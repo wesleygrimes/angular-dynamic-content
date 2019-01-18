@@ -6,7 +6,7 @@ import { Component, Input } from '@angular/core';
     <div>{{ errorMessage }}</div>
   `
 })
-export class DynamicContentErrorComponent {
+export class DynamicContentOutletErrorComponent {
   @Input() errorMessage: string;
   constructor() {}
 }

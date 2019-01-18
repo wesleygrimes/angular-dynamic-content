@@ -7,11 +7,11 @@ import {
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class DynamicContentGuard implements CanActivate {
+export class DynamicContentOutletGuard implements CanActivate {
   canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
-    return false;
+    return false; // prevent accidental navigation to this route
   }
 }

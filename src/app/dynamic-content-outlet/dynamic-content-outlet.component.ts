@@ -7,27 +7,27 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { DynamicContentService } from '../dynamic-content.service';
+import { DynamicContentOutletService } from './dynamic-content-outlet.service';
 
 @Component({
-  selector: 'app-dynamic-content',
+  selector: 'app-dynamic-content-outlet',
   template: `
-    <div #container></div>
+    <ng-container #container></ng-container>
   `
 })
-export class DynamicContentComponent implements AfterViewInit, OnDestroy {
+export class DynamicContentOutletComponent implements AfterViewInit, OnDestroy {
   @ViewChild('container', { read: ViewContainerRef })
   container: ViewContainerRef;
 
-  @Input() componentType: string;
+  @Input() componentName: string;
 
   private component: ComponentRef<{}>;
 
-  constructor(private dynamicContentService: DynamicContentService) {}
+  constructor(private dynamicContentService: DynamicContentOutletService) {}
 
   async ngAfterViewInit() {
-    this.component = await this.dynamicContentService.getComponent(
-      this.componentType
+    this.component = await this.dynamicContentService.GetComponent(
+      this.componentName
     );
     this.container.insert(this.component.hostView);
   }

@@ -5,19 +5,19 @@ import {
   Injector,
   NgModuleFactoryLoader
 } from '@angular/core';
-import { DynamicContentErrorComponent } from './dynamic-content-error/dynamic-content-error.component';
-import { DynamicContentRegistry } from './dynamic-content.registry';
-import { DynamicContentRoutes } from './dynamic-content.routes';
+import { DynamicContentOutletErrorComponent } from './dynamic-content-outlet-error.component';
+import { DynamicContentOutletMappings } from './dynamic-content-outlet.mappings';
+import { DynamicContentOutletRegistry } from './dynamic-content-outlet.registry';
 
 @Injectable()
-export class DynamicContentService {
+export class DynamicContentOutletService {
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
     private moduleLoader: NgModuleFactoryLoader,
     private injector: Injector
   ) {}
 
-  async getComponent(componentName: string): Promise<ComponentRef<any>> {
+  async GetComponent(componentName: string): Promise<ComponentRef<any>> {
     const modulePath = this.getModulePathForComponent(componentName);
 
     if (!modulePath) {
@@ -26,7 +26,7 @@ export class DynamicContentService {
       );
     }
 
-    const componentType = DynamicContentRegistry[componentName];
+    const componentType = DynamicContentOutletRegistry[componentName];
 
     if (!componentType) {
       return this.getDynamicContentErrorComponent(
@@ -57,7 +57,9 @@ export class DynamicContentService {
   private getModulePathForComponent(componentName: string) {
     let modulePath: string = null;
 
-    const manifest = DynamicContentRoutes.find(m => m.path === componentName);
+    const manifest = DynamicContentOutletMappings.find(
+      m => m.path === componentName
+    );
 
     if (manifest && manifest.loadChildren && manifest.loadChildren.toString()) {
       modulePath = manifest.loadChildren.toString();
@@ -68,7 +70,7 @@ export class DynamicContentService {
 
   private getDynamicContentErrorComponent(errorMessage: string) {
     const factory = this.componentFactoryResolver.resolveComponentFactory(
-      DynamicContentErrorComponent
+      DynamicContentOutletErrorComponent
     );
     const componentRef = factory.create(this.injector);
     const instance = <any>componentRef.instance;
