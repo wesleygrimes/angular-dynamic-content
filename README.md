@@ -1,6 +1,6 @@
 # Building An AOT-Friendly Dynamic Content Outlet in Angular
 
-Have you ever needed to dynamically load content or components in your Angular applications in a way that the built-in structural directives just don't provide? Is your requirement weird enough that `*ngIf` and `*ngSwitch` just don't provide enough flexibilty? Do you want that flexibility but still need the optimization benefits of using Ahead-of-Time compilation Well, I have good news for you....you're not alone. Even more so, you'll have a solution up and running in less than an hour.
+Have you ever needed to dynamically load content or components in your Angular applications in a way that the built-in structural directives just don't provide? Is your requirement weird enough that `*ngIf` and `*ngSwitch` just don't provide enough flexibility? Do you want that flexibility but still need the optimization benefits of using Ahead-of-Time compilation Well, I have good news for you....you're not alone. Even more so, you'll have a solution up and running in less than an hour.
 
 If I can have an hour of your time you will be able to implement a solution that you will provide a solid way to choose from and load dynamically, at runtime, a set of pre-defined modules & components in your application.
 
@@ -10,7 +10,7 @@ Assumptions: This article is assumes you are building an Angular 6+ application 
 
 ## TL;DR - Build a Dynamic Content Outlet
 
-You're going to build a special module with a dynamic component outlet that can be included and used anywhere in your application. The only requirement is that you register, upfront, an array mapping your dynamic components to their parent modules. This "tricks" the compiler into thinking these dynamic modules are lazy-loaded routes. The compiler then splits them off into separate minifed chunks and makes them available to the SystemJS loader at runtime, with AOT.
+You're going to build a special module with a dynamic component outlet that can be included and used anywhere in your application. The only requirement is that you register, upfront, an array mapping your dynamic components to their parent modules. This "tricks" the compiler into thinking these dynamic modules are lazy-loaded routes. The compiler then splits them off into separate minified chunks and makes them available to the SystemJS loader at runtime, with AOT.
 
 ## Create A Dynamic Content Outlet Module
 
@@ -170,7 +170,7 @@ export class DynamicContentOutletService {
 
 ### Create a new DynamicContentOutletGuard
 
-Create a new file underneath the folder `src/app/dynamic-content-outlet` named `dynamic-content-outlet.guard.ts`. This serves as a stop-gap to prevent accidental navigation to the routes as techincally the dynamic components are lazy-loaded Angular routes.
+Create a new file underneath the folder `src/app/dynamic-content-outlet` named `dynamic-content-outlet.guard.ts`. This serves as a stop-gap to prevent accidental navigation to the routes as technically the dynamic components are lazy-loaded Angular routes.
 
 ```
 import { Injectable } from '@angular/core';
