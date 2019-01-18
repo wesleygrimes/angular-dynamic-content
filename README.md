@@ -69,7 +69,7 @@ Create a new file underneath the folder `src/app/dynamic-content-outlet` named `
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-dynamic-content-error-component',
+  selector: 'app-dynamic-content-outlet-error-component',
   template: `
     <div>{{ errorMessage }}</div>
   `
