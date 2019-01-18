@@ -1,1 +1,7 @@
 <div><div #container></div></div>
+
+<div *ngIf="loadingError" class="alert alert-danger" style="font-size:normal">
+  Component Load Failed. Check DynamicComponentManifests in
+  dynamic-content.module
+  <div>{{ loadingError }}</div>
+</div>

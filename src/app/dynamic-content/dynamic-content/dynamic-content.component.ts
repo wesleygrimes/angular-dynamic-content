@@ -1,93 +1,41 @@
 import {
+  AfterViewInit,
   Component,
-  ComponentFactoryResolver,
   ComponentRef,
-  Injector,
   Input,
-  NgModuleFactory,
-  NgModuleFactoryLoader,
   OnDestroy,
-  OnInit,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { DynamicComponentManifest } from 'src/app/_models';
-import { DynamicComponentManifests } from '../dynamic-component.manifests';
-import { UnknownDynamicContentComponent } from '../unknown-dynamic-content/unknown-dynamic-content.component';
+import { DynamicContentService } from '../dynamic-content.service';
 
 @Component({
   selector: 'app-dynamic-content',
-  templateUrl: './dynamic-content.component.html',
-  styleUrls: ['./dynamic-content.component.css']
+  template: `
+    <div #container></div>
+  `
 })
-export class DynamicContentComponent implements OnInit, OnDestroy {
+export class DynamicContentComponent implements AfterViewInit, OnDestroy {
   @ViewChild('container', { read: ViewContainerRef })
   container: ViewContainerRef;
 
-  @Input() type: string;
+  @Input() componentType: string;
 
-  private componentRef: ComponentRef<{}>;
+  private component: ComponentRef<{}>;
 
-  constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private moduleFactoryLoader: NgModuleFactoryLoader,
-    private injector: Injector
-  ) {}
+  constructor(private dynamicContentService: DynamicContentService) {}
 
-  ngOnInit() {
-    if (this.type) {
-      const sectionName = this.type;
-      const componentManifest: DynamicComponentManifest = DynamicComponentManifests.find(
-        function(manifest) {
-          return manifest.path === sectionName;
-        }
-      );
-
-      if (!componentManifest) {
-        this.dynamicComponentError(
-          `'${sectionName}' is not found in the DynamicComponentManifest.`
-        );
-        return;
-      }
-
-      this.moduleFactoryLoader
-        .load(componentManifest.loadChildren)
-        .then((moduleFactory: NgModuleFactory<any>) => {
-          console.log(moduleFactory);
-          const moduleRef = moduleFactory.create(this.injector);
-          const entryComponentType = moduleRef.injector.get(
-            componentManifest.componentName
-          );
-          const componentFactory = moduleRef.componentFactoryResolver.resolveComponentFactory(
-            entryComponentType
-          );
-          this.componentRef = this.container.createComponent(componentFactory);
-        })
-        .catch((reason: any) => {
-          this.dynamicComponentError(
-            `Module for '${sectionName}' could not be loaded.  Module: ${
-              componentManifest.loadChildren
-            } Reason: ${reason}`
-          );
-        });
-    }
-  }
-
-  dynamicComponentError(errorMessage: string) {
-    console.error(errorMessage);
-    const factory = this.componentFactoryResolver.resolveComponentFactory(
-      UnknownDynamicContentComponent
+  async ngAfterViewInit() {
+    this.component = await this.dynamicContentService.getComponent(
+      this.componentType
     );
-    this.componentRef = this.container.createComponent(factory);
-    // set component context
-    const instance = <UnknownDynamicContentComponent>this.componentRef.instance;
-    instance.loadingError = errorMessage;
+    this.container.insert(this.component.hostView);
   }
 
   ngOnDestroy() {
-    if (this.componentRef) {
-      this.componentRef.destroy();
-      this.componentRef = null;
+    if (this.component) {
+      this.component.destroy();
+      this.component = null;
     }
   }
 }

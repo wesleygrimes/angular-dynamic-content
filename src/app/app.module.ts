@@ -11,7 +11,10 @@ import { DynamicContentModule } from './dynamic-content/dynamic-content.module';
   declarations: [AppComponent],
   imports: [BrowserModule, DynamicContentModule],
   providers: [
-    { provide: NgModuleFactoryLoader, useClass: SystemJsNgModuleLoader }
+    {
+      provide: NgModuleFactoryLoader,
+      useClass: SystemJsNgModuleLoader
+    }
   ],
   bootstrap: [AppComponent]
 })

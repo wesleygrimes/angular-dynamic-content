@@ -5,7 +5,6 @@ import { MySpecialDynamicContentComponent } from './my-special-dynamic-content.c
 @NgModule({
   declarations: [MySpecialDynamicContentComponent],
   imports: [CommonModule],
-  exports: [MySpecialDynamicContentComponent],
   entryComponents: [MySpecialDynamicContentComponent]
 })
 export class MySpecialDynamicContentModule {}
