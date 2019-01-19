@@ -12,7 +12,7 @@ import { DynamicContentOutletMappings } from './dynamic-content-outlet.mappings'
 import { DynamicContentOutletService } from './dynamic-content-outlet.service';
 
 @NgModule({
-  imports: [CommonModule, RouterModule.forRoot(DynamicContentOutletMappings)],
+  imports: [CommonModule, RouterModule.forChild(DynamicContentOutletMappings)],
   declarations: [
     DynamicContentOutletComponent,
     DynamicContentOutletErrorComponent
