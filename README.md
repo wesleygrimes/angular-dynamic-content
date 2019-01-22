@@ -10,7 +10,7 @@ Assumptions: This article is assumes you are building an Angular 6+ application 
 
 ## TL;DR - Build a Dynamic Content Outlet
 
-You're going to build a special module with a dynamic component outlet that can be included and used anywhere in your application. The only requirement is that you register, upfront, an array mapping your dynamic components to their parent modules. This "tricks" the compiler into thinking these dynamic modules are lazy-loaded routes. The compiler then splits them off into separate minified chunks and makes them available to the SystemJS loader at runtime, with AOT.
+You're going to build a special module with a dynamic component outlet that can be included and used anywhere in your application. The only requirement is that you register, upfront, an array mapping your dynamic components to their parent modules. You will also add these modules to the `lazyModules` property in your `angular.json` file. By doing so, the compiler will pre-compile these module. The compiler then splits them off into separate minified chunks and makes them available to the SystemJS loader at runtime, with AOT.
 
 ## Create A Dynamic Content Outlet Module
 
@@ -22,43 +22,22 @@ Generate a new module named `DynamicContentOutletModule` by running the followin
 
 ### Create a new DynamicContentOutletRegistry
 
-Create a new file underneath the newly created folder `src/app/dynamic-content-outlet` named `dynamic-content-outlet.registry.ts`. This will serve as the placeholder for an object dictionary that maps the Component Name string to the Component Type. For now, it will be an empty object as follows.
+Create a new file underneath the newly created folder `src/app/dynamic-content-outlet` named `dynamic-content-outlet.registry.ts`. This will serve as the placeholder for array mapping component name to component type, module path and module name. For now, it will be an empty array as follows.
 
 ```
+interface RegistryItem {
+  componentType: any;
+  componentName: string;
+  modulePath: string;
+  moduleName: string;
+}
+
 /**
  * A mapping of Component Name to Component Type
  * that must be updated with each new component
  * that you wish to load dynamically.
  */
-export const DynamicContentOutletRegistry = {};
-```
-
-### Create a new DynamicContentOutletMappings
-
-Create a new file underneath the folder `src/app/dynamic-content-outlet` named `dynamic-content-outlet.mappings.ts`. This is essentially an Angular `Routes` array. For now, it will be an empty object as follows. We will come back later and fill this in.
-
-```
-import { Routes } from '@angular/router';
-
-/**
- * A list of pseudo-routes or outlets linking Component to module
- * that must be updated with each new component that you wish
- * to load dynamically. This must be of type Routes so that
- * the Angular AOT compiler picks these up and chunks them
- * for runtime loading.
- *
- *
- * path: This should match exactly the name of the Component
- *       you wish to load dynamically.
- *
- * loadChildren: absolute path to the module containing the
- *  component you wish to load dynamically. This follows the
- *  same syntax as lazy-loaded routes in Angular.
- *
- * canActivate: Make sure to include the DynamicContentOutletGuard
- *  to prevent accidental navigation.
- */
-export const DynamicContentOutletMappings: Routes = [];
+export const DynamicContentOutletRegistry: RegistryItem[] = [];
 ```
 
 ### Create a new DynamicContentOutletErrorComponent
@@ -94,7 +73,6 @@ import {
   NgModuleFactoryLoader
 } from '@angular/core';
 import { DynamicContentOutletErrorComponent } from './dynamic-content-outlet-error.component';
-import { DynamicContentOutletMappings } from './dynamic-content-outlet.mappings';
 import { DynamicContentOutletRegistry } from './dynamic-content-outlet.registry';
 
 @Injectable()
@@ -114,7 +92,7 @@ export class DynamicContentOutletService {
       );
     }
 
-    const componentType = DynamicContentOutletRegistry[componentName];
+    const componentType = this.getComponentTypeForComponent(componentName);
 
     if (!componentType) {
       return this.getDynamicContentErrorComponent(
@@ -143,17 +121,28 @@ export class DynamicContentOutletService {
   }
 
   private getModulePathForComponent(componentName: string) {
-    let modulePath: string = null;
-
-    const manifest = DynamicContentOutletMappings.find(
-      m => m.path === componentName
+    const registryItem = DynamicContentOutletRegistry.find(
+      i => i.componentName === componentName
     );
 
-    if (manifest && manifest.loadChildren && manifest.loadChildren.toString()) {
-      modulePath = manifest.loadChildren.toString();
+    if (registryItem && registryItem.modulePath) {
+      // imported modules must be in the format 'path#moduleName'
+      return `${registryItem.modulePath}#${registryItem.moduleName}`;
     }
 
-    return modulePath;
+    return null;
+  }
+
+  private getComponentTypeForComponent(componentName: string) {
+    const registryItem = DynamicContentOutletRegistry.find(
+      i => i.componentName === componentName
+    );
+
+    if (registryItem && registryItem.componentType) {
+      return registryItem.componentType;
+    }
+
+    return null;
   }
 
   private getDynamicContentErrorComponent(errorMessage: string) {
@@ -164,30 +153,6 @@ export class DynamicContentOutletService {
     const instance = <any>componentRef.instance;
     instance.errorMessage = errorMessage;
     return componentRef;
-  }
-}
-```
-
-### Create a new DynamicContentOutletGuard
-
-Create a new file underneath the folder `src/app/dynamic-content-outlet` named `dynamic-content-outlet.guard.ts`. This serves as a stop-gap to prevent accidental navigation to the routes as technically the dynamic components are lazy-loaded Angular routes.
-
-```
-import { Injectable } from '@angular/core';
-import {
-  ActivatedRouteSnapshot,
-  CanActivate,
-  RouterStateSnapshot
-} from '@angular/router';
-import { Observable } from 'rxjs';
-
-@Injectable()
-export class DynamicContentOutletGuard implements CanActivate {
-  canActivate(
-    next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean> | Promise<boolean> | boolean {
-    return false; // prevent accidental navigation to this route
   }
 }
 ```
@@ -251,15 +216,12 @@ import {
   NgModuleFactoryLoader,
   SystemJsNgModuleLoader
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
 import { DynamicContentOutletErrorComponent } from './dynamic-content-outlet-error.component';
 import { DynamicContentOutletComponent } from './dynamic-content-outlet.component';
-import { DynamicContentOutletGuard } from './dynamic-content-outlet.guard';
-import { DynamicContentOutletMappings } from './dynamic-content-outlet.mappings';
 import { DynamicContentOutletService } from './dynamic-content-outlet.service';
 
 @NgModule({
-  imports: [CommonModule, RouterModule.forRoot(DynamicContentOutletMappings)],
+  imports: [CommonModule],
   declarations: [
     DynamicContentOutletComponent,
     DynamicContentOutletErrorComponent
@@ -270,7 +232,6 @@ import { DynamicContentOutletService } from './dynamic-content-outlet.service';
       provide: NgModuleFactoryLoader,
       useClass: SystemJsNgModuleLoader
     },
-    DynamicContentOutletGuard,
     DynamicContentOutletService
   ]
 })
@@ -283,36 +244,48 @@ For any component that you would like dynamically rendered you need to do the fo
 
 1. Confirm that the component is listed in the `entryComponents` array in the module that the component is a part of.
 
-2. Add your component to the Dynamic Content Outlet Mappings in `src/app/dynamic-content-outlet/dynamic-content-outlet.mappings.ts`.
+2. Add your component to the Dynamic Content Outlet Resgistry Array in `src/app/dynamic-content-outlet/dynamic-content-outlet.registry.ts`.
 
-For any component that you would like dynamically rendered, add a new entry to the DynamicContentOutletMappings array in `dynamic-content-outlet.mappings.ts`. This is essentially an Angular `Routes` array. The following properties must filled out:
+For any component that you would like dynamically rendered, add a new entry to the DynamicContentOutletMappings array in `dynamic-content-outlet.registry.ts`. The following properties must filled out:
 
-- `path`: This should match exactly the name of the Component you wish to load dynamically.
-- `loadChildren`: The absolute path to the module containing the component you wish to load dynamically. Including the module name following a `#`.
-- `canActivate`: Make sure to include the DynamicContentOutletGuard to prevent accidental navigation. If you include this for the first time you may need to add it to your import declarations at the top of file.
+- `componentName`: This should match exactly the name of the Component you wish to load dynamically.
+- `componentType`: This should be the literal type of the Component you wish to load dynamically. Not wrapped in quotes.
+- `modulePath`: The absolute path to the module containing the component you wish to load dynamically. This is only the path to the module and does NOT include moduleName after a `#`.
+- `moduleName`: This is the exact name of the module.
 
 ### Example Component Mapping
 
 ```
 {
-  path: 'MySpecialDynamicContentComponent',
-  loadChildren:
-      'src/app/my-special-dynamic-content/my-special-dynamic-content.module#MySpecialDynamicContentModule',
-  canActivate: [DynamicContentOutletGuard]
+  componentName: 'MySpecialDynamicContentComponent',
+  componentType: MySpecialDynamicContentComponent,
+  modulePath: 'src/app/my-special-dynamic-content/my-special-dynamic-content.module',
+  moduleName: 'MySpecialDynamicContentModule'
+},
+```
+
+3. In your `angular.json` update `projects > ** > architect > build > options > lazyModules` array and add an item for each module that you added to the registry in order for the Angular AOT compiler to detect and pre-compile your dynamic modules. If you have multiple projects in a folder make sure you add this for the correct project you are importing and using dnyamic modules in. The updated file will look similar to this:
+
+```
+{
+ ...
+  "projects": {
+    "angular-dynamic-content": {
+      ...
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            ...
+            "lazyModules": [
+              "src/app/my-special-dynamic-content/my-special-dynamic-content.module"
+            ]
+          },
+        }
+      }
+    }
+  }
 }
-```
-
-3. Add your component to the Dynamic Content Outlet Registry in `src/dynamic-content-outlet/dynamic-content-outlet.registry.ts`.
-
-One of the requirements of the `ComponentFactoryResolver: resolveComponentFactory` method is that you have to pass the literal type of the component. Since this cannot be a string literal, we create a dictionary that maps the Component Name string to the Component Type. Make sure that you add your component to this dictionary. You will need to import the component type from the component file at the top of the import declarations in your file.
-
-### Example Component Registry Item
-
-```
-export const DynamicContentOutletRegistry = {
-  ...,
-  MySpecialDynamicContentComponent: MySpecialDynamicContentComponent
-};
 ```
 
 ## Wire up the Dynamic Content Outlet Module

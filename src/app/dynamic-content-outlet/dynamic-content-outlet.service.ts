@@ -6,7 +6,6 @@ import {
   NgModuleFactoryLoader
 } from '@angular/core';
 import { DynamicContentOutletErrorComponent } from './dynamic-content-outlet-error.component';
-import { DynamicContentOutletMappings } from './dynamic-content-outlet.mappings';
 import { DynamicContentOutletRegistry } from './dynamic-content-outlet.registry';
 
 @Injectable()
@@ -26,7 +25,7 @@ export class DynamicContentOutletService {
       );
     }
 
-    const componentType = DynamicContentOutletRegistry[componentName];
+    const componentType = this.getComponentTypeForComponent(componentName);
 
     if (!componentType) {
       return this.getDynamicContentErrorComponent(
@@ -55,17 +54,28 @@ export class DynamicContentOutletService {
   }
 
   private getModulePathForComponent(componentName: string) {
-    let modulePath: string = null;
-
-    const manifest = DynamicContentOutletMappings.find(
-      m => m.path === componentName
+    const registryItem = DynamicContentOutletRegistry.find(
+      i => i.componentName === componentName
     );
 
-    if (manifest && manifest.loadChildren && manifest.loadChildren.toString()) {
-      modulePath = manifest.loadChildren.toString();
+    if (registryItem && registryItem.modulePath) {
+      // imported modules must be in the format 'path#moduleName'
+      return `${registryItem.modulePath}#${registryItem.moduleName}`;
     }
 
-    return modulePath;
+    return null;
+  }
+
+  private getComponentTypeForComponent(componentName: string) {
+    const registryItem = DynamicContentOutletRegistry.find(
+      i => i.componentName === componentName
+    );
+
+    if (registryItem && registryItem.componentType) {
+      return registryItem.componentType;
+    }
+
+    return null;
   }
 
   private getDynamicContentErrorComponent(errorMessage: string) {

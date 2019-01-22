@@ -4,15 +4,12 @@ import {
   NgModuleFactoryLoader,
   SystemJsNgModuleLoader
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
 import { DynamicContentOutletErrorComponent } from './dynamic-content-outlet-error.component';
 import { DynamicContentOutletComponent } from './dynamic-content-outlet.component';
-import { DynamicContentOutletGuard } from './dynamic-content-outlet.guard';
-import { DynamicContentOutletMappings } from './dynamic-content-outlet.mappings';
 import { DynamicContentOutletService } from './dynamic-content-outlet.service';
 
 @NgModule({
-  imports: [CommonModule, RouterModule.forChild(DynamicContentOutletMappings)],
+  imports: [CommonModule],
   declarations: [
     DynamicContentOutletComponent,
     DynamicContentOutletErrorComponent
@@ -23,8 +20,8 @@ import { DynamicContentOutletService } from './dynamic-content-outlet.service';
       provide: NgModuleFactoryLoader,
       useClass: SystemJsNgModuleLoader
     },
-    DynamicContentOutletGuard,
     DynamicContentOutletService
-  ]
+  ],
+  entryComponents: [DynamicContentOutletErrorComponent]
 })
 export class DynamicContentOutletModule {}
