@@ -33,7 +33,7 @@ interface RegistryItem {
 }
 
 /**
- * A mapping of Component Name to Component Type
+ * A resgitry array of Component Name to details
  * that must be updated with each new component
  * that you wish to load dynamically.
  */
@@ -246,7 +246,7 @@ For any component that you would like dynamically rendered you need to do the fo
 
 2. Add your component to the Dynamic Content Outlet Resgistry Array in `src/app/dynamic-content-outlet/dynamic-content-outlet.registry.ts`.
 
-For any component that you would like dynamically rendered, add a new entry to the DynamicContentOutletMappings array in `dynamic-content-outlet.registry.ts`. The following properties must filled out:
+For any component that you would like dynamically rendered, add a new entry to the DynamicContentOutletRegistry array in `dynamic-content-outlet.registry.ts`. The following properties must filled out:
 
 - `componentName`: This should match exactly the name of the Component you wish to load dynamically.
 - `componentType`: This should be the literal type of the Component you wish to load dynamically. Not wrapped in quotes.
@@ -264,7 +264,7 @@ For any component that you would like dynamically rendered, add a new entry to t
 },
 ```
 
-3. In your `angular.json` update `projects > ** > architect > build > options > lazyModules` array and add an item for each module that you added to the registry in order for the Angular AOT compiler to detect and pre-compile your dynamic modules. If you have multiple projects in a folder make sure you add this for the correct project you are importing and using dnyamic modules in. The updated file will look similar to this:
+3. In your `angular.json` update `projects > ** > architect > build > options > lazyModules` array and add an item for each module that you added to the registry in order for the Angular AOT compiler to detect and pre-compile your dynamic modules. If you have multiple projects in a folder make sure you add this for the correct project you are importing and using dynamic modules in. The updated file will look similar to this:
 
 ```
 {
