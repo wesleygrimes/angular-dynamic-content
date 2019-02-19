@@ -1,6 +1,11 @@
 <app-dynamic-content-outlet
-  [componentName]="'MyOtherSpecialDynamicContentComponent'"
+  *ngIf="selectedComponent"
+  [componentName]="selectedComponent"
 ></app-dynamic-content-outlet>
-<app-dynamic-content-outlet
-  [componentName]="'MySpecialDynamicContentComponent'"
-></app-dynamic-content-outlet>
+
+Choose a component to render:
+<select [(ngModel)]="selectedComponent">
+  <option *ngFor="let component of components" [ngValue]="component">{{
+    component
+  }}</option>
+</select>

@@ -21,7 +21,7 @@ export class DynamicContentOutletService {
 
     if (!modulePath) {
       return this.getDynamicContentErrorComponent(
-        `Unable to derive modulePath from component: ${componentName} in dynamic-content.routes.ts`
+        `Unable to derive modulePath from component: ${componentName} in dynamic-content.registry.ts`
       );
     }
 

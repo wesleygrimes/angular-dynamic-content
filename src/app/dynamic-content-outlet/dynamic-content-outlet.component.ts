@@ -1,8 +1,8 @@
 import {
-  AfterViewInit,
   Component,
   ComponentRef,
   Input,
+  OnChanges,
   OnDestroy,
   ViewChild,
   ViewContainerRef
@@ -15,7 +15,7 @@ import { DynamicContentOutletService } from './dynamic-content-outlet.service';
     <ng-container #container></ng-container>
   `
 })
-export class DynamicContentOutletComponent implements AfterViewInit, OnDestroy {
+export class DynamicContentOutletComponent implements OnDestroy, OnChanges {
   @ViewChild('container', { read: ViewContainerRef })
   container: ViewContainerRef;
 
@@ -25,17 +25,27 @@ export class DynamicContentOutletComponent implements AfterViewInit, OnDestroy {
 
   constructor(private dynamicContentService: DynamicContentOutletService) {}
 
-  async ngAfterViewInit() {
+  async ngOnChanges() {
+    await this.renderComponent();
+  }
+
+  private async renderComponent() {
+    this.destroyComponent();
+
     this.component = await this.dynamicContentService.GetComponent(
       this.componentName
     );
     this.container.insert(this.component.hostView);
   }
 
-  ngOnDestroy() {
+  destroyComponent() {
     if (this.component) {
       this.component.destroy();
       this.component = null;
     }
+  }
+
+  ngOnDestroy() {
+    this.destroyComponent();
   }
 }
