@@ -29,6 +29,10 @@ export class DynamicContentOutletComponent implements OnDestroy, OnChanges {
     await this.renderComponent();
   }
 
+  ngOnDestroy() {
+    this.destroyComponent();
+  }
+
   private async renderComponent() {
     this.destroyComponent();
 
@@ -38,14 +42,10 @@ export class DynamicContentOutletComponent implements OnDestroy, OnChanges {
     this.container.insert(this.component.hostView);
   }
 
-  destroyComponent() {
+  private destroyComponent() {
     if (this.component) {
       this.component.destroy();
       this.component = null;
     }
-  }
-
-  ngOnDestroy() {
-    this.destroyComponent();
   }
 }
