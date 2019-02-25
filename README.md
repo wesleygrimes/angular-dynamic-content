@@ -1,3 +1,5 @@
+<div class="ultimate-courses-banner"><a href="https://ultimatecourses.com/angular?ref=76683_ttll_neb"><img src="https://ultimatecourses.com/assets/img/banners/ultimate-angular-leader.svg" style="width:100%;max-width:100%"></a></div>
+
 # Overview — Dynamic Content Outlet
 
 Have you ever needed to dynamically load content or components in your Angular applications? How about in a way that the built-in structural directives  (`*ngIf*`, `*ngSwitch`) just don’t provide? Are you also in need of the optimization benefits of using Ahead-of-Time compilation?
