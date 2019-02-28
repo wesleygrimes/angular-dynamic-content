@@ -8,4 +8,9 @@ import { DynamicMultipleTwoComponent } from './dynamic-multiple-two.component';
   imports: [CommonModule],
   entryComponents: [DynamicMultipleOneComponent, DynamicMultipleTwoComponent]
 })
-export class DynamicMultipleModule {}
+export class DynamicMultipleModule {
+  static dynamicComponentsMap = {
+    DynamicMultipleOneComponent,
+    DynamicMultipleTwoComponent
+  };
+}

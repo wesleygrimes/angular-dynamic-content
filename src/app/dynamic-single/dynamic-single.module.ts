@@ -7,4 +7,8 @@ import { DynamicSingleOneComponent } from './dynamic-single-one.component';
   imports: [CommonModule],
   entryComponents: [DynamicSingleOneComponent]
 })
-export class DynamicSingleModule {}
+export class DynamicSingleModule {
+  static dynamicComponentsMap = {
+    DynamicSingleOneComponent
+  };
+}
